@@ -195,6 +195,7 @@ import { COLUMN_NAMES, ItemTypes, tasks } from './Constants';
 
 import './App.css';
 import DialogBox from './DialogBox';
+import RightContext from './RightContext';
 
 const MovableItem = ({
   name,
@@ -422,63 +423,74 @@ export const App = () => {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [textDialog, setTextDialog] = useState<string>('');
   const [newTask, setNewTask] = useState<string>('');
+  const [newTaskType, setNewTaskType] = useState<string>('');
+  const options = ['Not Started', 'in Progress', 'Completed'];
+  const [selected, setSelected] = useState(options[0]);
   function toggleModalHandler(name: string, e: any) {
     e.preventDefault();
     setTextDialog(name);
     setOpenDialog(!openDialog);
   }
 
-  // function addNewTask() {
-  //   let temp = items;
-  //   temp.push({
-  //     id:'random',
-  //     column: '',
-  //     name:newTask;
-  //   })
+  function addNewTask() {
+    let temp = {
+      id: items.length + 1,
+      column: selected,
+      name: newTask,
+    };
 
-  //   fetch('http://localhost:1234/tasks', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify(newTask),
-  //   }).then(
-  //     setItems(...items, {
-  //       singledata: {
-  //         title: '',
-  //         author: '',
-  //       },
-  //     })
-  //   );
-  // }
+    let newTaskList = items;
+    newTaskList.push(temp);
+
+    fetch('http://localhost:1234/tasks', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(temp),
+    })
+      .then(() => {
+        setItems(newTaskList);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
 
   function onAddTaskHandler(e: any) {
     e.preventDefault();
+    setNewTask(e.target.value);
   }
 
   return (
     <div className='container'>
+      {/* <RightContext /> */}
       <DndProvider backend={HTML5Backend}>
-        {/* <input
-          onChange={(e) => {
-            onAddTaskHandler(e);
-          }}
-        ></input>
-        <select>
-          <option value='Not Started'>Not Started</option>
+        <div>
+          <input
+            onChange={(e) => {
+              onAddTaskHandler(e);
+            }}
+          ></input>
+          <select
+            value={selected}
+            onChange={(e) => setSelected(e.target.value)}
+          >
+            <option value='Not Started'>Not Started</option>
 
-          <option value='In Progress'>In Progress</option>
+            <option value='In Progress'>In Progress</option>
 
-          <option value='Completed'>Completed</option>
-        </select>
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            addNewTask();
-          }}
-        >
-          +
-        </button> */}
+            <option value='Completed'>Completed</option>
+          </select>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              addNewTask();
+            }}
+          >
+            +
+          </button>
+        </div>
         <Column title={NOT_STARTED} className='column do-it-column'>
           {returnItemsForColumn(NOT_STARTED)}
         </Column>
